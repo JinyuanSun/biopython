@@ -22,7 +22,22 @@ from Bio.Graphics.GenomeDiagram import CrossLink
 from Bio import SeqIO
 from Bio.SeqFeature import SeqFeature, FeatureLocation
 
+from Bio import Entrez
+
 name = "Proux Fig 6"
+
+# Here we download GenBank files for you to reproduce the results more easily.
+
+Entrez.email = "A.N.Other@example.com"     # Always tell NCBI who you are
+for accession in ["NC_002703", "AF323668", "NC_003212"]:
+    handle = Entrez.esearch(db="nuccore", term=accession)
+    gbk = Entrez.efetch(db="nuccore", 
+            id=Entrez.read(handle)["IdList"][0], 
+            rettype="gbwithparts", 
+            retmode="text")
+    with open(accession + ".gbk",'w') as gbkfile:
+        gbkfile.write(gbk.read())
+        gbkfile.close()
 
 # As explained in the Biopython Tutorial, these are three phage genomes. The first
 # two are self-containged GenBank files, but the third phage is integrated into a
@@ -33,6 +48,8 @@ A_rec = SeqIO.read("NC_002703.gbk", "gb")
 B_rec = SeqIO.read("AF323668.gbk", "gb")
 C_rec = SeqIO.read("NC_003212.gbk", "gb")[2587879:2625807].reverse_complement(name=True)
 records = {rec.name: rec for rec in [A_rec, B_rec, C_rec]}
+
+
 
 # Here we hard code the gene colors for simiplicity and to match the target image.
 # In practice you might have an automatic mapping based on the gene annotation
@@ -78,7 +95,7 @@ C_colors = (
     + [blue] * 2
     + [grey, blue]
     + [lightblue] * 2
-    + [grey] * 8
+    + [grey] * 9
 )
 
 # Here we hard code a list of cross-links with percentage identity scores, based
